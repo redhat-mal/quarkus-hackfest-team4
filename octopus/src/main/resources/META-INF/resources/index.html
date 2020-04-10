@@ -1,0 +1,208 @@
+<html>
+    <head>
+        <title>Quarkus Octopus Twitter App</title>
+        <meta charset="UTF-8">
+        <script src="//code.angularjs.org/snapshot/angular.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+
+        <style>
+            h1, h2, h3, h4, h5, h6 {
+                margin-bottom: 0.5rem;
+                font-weight: 400;
+                line-height: 1.5;
+            }
+
+            div.header {
+                
+                text-align: left;
+                font-size: 7.5rem;
+                font-weight: 400;
+            }
+
+            table.sentiments {
+                border: 1;
+            }
+    
+            h1 {
+                font-size: 2.5rem;
+            }
+    
+            h2 {
+                font-size: 2rem
+            }
+    
+            h3 {
+                font-size: 1.75rem
+            }
+    
+            h4 {
+                font-size: 1.5rem
+            }
+    
+            h5 {
+                font-size: 1.25rem
+            }
+    
+            h6 {
+                font-size: 1rem
+            }
+    
+            .lead {
+                font-weight: 300;
+                font-size: 2rem;
+            }
+    
+            .banner {
+                font-size: 2.7rem;
+                margin: 0;
+                padding: 2rem 1rem;
+                background-color: #00A1E2;
+                color: white;
+            }
+    
+            body {
+                margin: 0;
+                font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            }
+    
+            code {
+                font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                font-size: 87.5%;
+                color: #e83e8c;
+                word-break: break-word;
+            }
+    
+            .left-column {
+                padding: .75rem;
+                max-width: 75%;
+                min-width: 55%;
+            }
+    
+            .right-column {
+                padding: .75rem;
+                max-width: 25%;
+            }
+    
+            .container {
+                display: flex;
+                width: 100%;
+            }
+    
+            li {
+                margin: 0.75rem;
+            }
+    
+            .right-section {
+                margin-left: 1rem;
+                padding-left: 0.5rem;
+            }
+    
+            .right-section h3 {
+                padding-top: 0;
+                font-weight: 200;
+            }
+    
+            .right-section ul {
+                border-left: 0.3rem solid #00A1E2;
+                list-style-type: none;
+                padding-left: 0;
+            }
+    
+        </style>
+        
+    </head>
+    <body ng-app="intervalExample">
+        <div class="header">&nbsp;&nbsp;TEAM &nbsp;<img height="140" width="140" src="octopus.png"></div>
+    <div class="container">
+            <div class="xleft-column">&nbsp;&nbsp;&nbsp;
+            </div>
+            <div class="left-column">
+
+                <h1>Octopus Twitter Sentiments Demo</h1>
+                <div ng-controller = "sentimentsController">
+                    <div>
+                        <p> Enter a query to get current Twitter Sentements</p>
+                        Query: <input type="text" id="twitterQuery" name="twitterQuery" value="@RedHat"> <input data-ng-click="startSentiments()" type="button" name="startQuery" value="Go">
+                    </div>
+                    
+                   <table class="sentiments" >
+                      <tr>
+                         <th>Sentiments</th>
+                      </tr>
+                   
+                      <tr>
+                         <td>{{ sentimentdata }}</td>
+                      </tr>
+                   </table>
+                </div>
+          
+            </div>
+            <div class="right-column">
+            </div>
+        </div>
+        <script>
+
+
+            angular.module('intervalExample', [])
+            .controller('sentimentsController', ['$scope', '$http','$interval',
+              function($scope, $http, $interval) {
+
+                $scope.sentimentdata = [{"endWindow":"2020-04-09T16:26:55.000322Z","metrics":[{"count":1,"hashtag":"inittag1"},{"count":1,"hashtag":"economy"},{"count":1,"hashtag":"tremendous"}],"startWindow":"2020-04-09T16:26:55.000303Z"}];
+
+                var stop;
+
+                var myArray = [];
+                $scope.startSentiments = function() {
+                    var queryString = $("#twitterQuery").val();
+                    $scope.sentimentdata = "hello";
+                    //alert("start" + queryString);
+                    var url = "/sentiments/" + queryString;
+                    $http.get(url).then( function(response) {
+                     $scope.topic = response.data;
+                    });
+
+                  // Don't start a new fight if we are already fighting
+                  if ( angular.isDefined(stop) ) return;
+
+        
+                  //stop = $interval(function() {
+
+        
+                    console.log("Starting Event listenter ++++" + $scope);
+                    source = new EventSource("/sentiments/refresh3/test");
+                    source.addEventListener('message', function(e) {
+                        console.log(e.data);
+                        var jd = JSON.parse(e.data);
+                        console.log("Updated" + jd);
+                        $scope.sentimentdata.push(jd);
+    
+                      }, false);
+                      
+                      source.addEventListener('open', function(e) {
+                        // Connection was opened.
+                      }, false);
+                      
+                      source.addEventListener('error', function(e) {
+                        if (e.readyState == EventSource.CLOSED) {
+                          // Connection was closed.
+                        }
+                      }, false);
+
+                     //var url = "/sentiments/refresh3/" + $scope.topic;
+                     //$http.get(url).then( function(response) {
+                      //$scope.sentimentdata = response.data;
+                     //});
+                    //}, 5000);
+                };
+
+                
+            }])      
+
+
+         </script>
+         
+          
+
+    </body>
+</html>

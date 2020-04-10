@@ -1,0 +1,31 @@
+# Configuration file
+# key = value
+
+# container build/push with s2i
+quarkus.s2i.base-jvm-image=fabric8/s2i-java:latest-java11
+
+# kubernetes
+quarkus.kubernetes-client.trust-certs=true
+quarkus.kubernetes.deployment-target=openshift
+quarkus.openshift.part-of=Octopus
+quarkus.openshift.ports.http1.container-port=8080
+
+# Configure the Kafka source (we read from it)
+mp.messaging.incoming.twitter-posts.connector=smallrye-kafka
+mp.messaging.incoming.twitter-posts.topic=twitter-posts
+mp.messaging.incoming.twitter-posts.value.deserializer=io.vertx.kafka.client.serialization.JsonObjectDeserializer
+
+
+mp.messaging.outgoing.generated-post.connector=smallrye-kafka
+mp.messaging.outgoing.generated-post.topic=twitter-posts
+mp.messaging.outgoing.generated-post.value.serializer=io.vertx.kafka.client.serialization.JsonObjectSerializer
+
+
+# Configure the Kafka source (we read from it)
+
+kafka.bootstrap.servers=twitter-kafka-bootstrap:9092
+
+quarkus.kafka-streams.application-id=window-aggregation
+quarkus.kafka-streams.topics=twitter-posts,hashtag-counts
+
+
